@@ -19,7 +19,7 @@ public class MatrixCalculation {
     }
 
     public double[][] calculateMatrix(double betta, double gamma) {
-        double[][] matrix;
+        double[][] matrix = new double[orderOfFunction][];
         initFiles();
 
         for (int k = 1; k <= orderOfFunction; k++) {
@@ -55,9 +55,8 @@ public class MatrixCalculation {
             int N = (int) Math.floor(nextTao / deltaTao + 0.5);
 
             appendToInputFile(k, N, gamma, betta, deltaTao);
-            /*
-                matrix[k - 1] = new double[n];
-                for (int i = 0; i < n; i++) {
+         /*   matrix[k - 1] = new double[N];
+            for (int i = 0; i < N; i++) {
                 double tao = deltaTao * i;
                 matrix[k - 1][i] = formula(k, betta, tao, gamma);
             }*/
@@ -88,7 +87,7 @@ public class MatrixCalculation {
         try {
             PrintWriter printWriter = new PrintWriter(new BufferedWriter(
                     new FileWriter(rootDir + inputFile, true)));
-            printWriter.println(String.format("%d %d %d %.5f %.5f %.5f", formula, k, n, gamma, betta, deltaTao));
+            printWriter.println(String.format("%d %d %d %.15f %.15f %.15f", formula, k, n, gamma, betta, deltaTao));
             printWriter.close();
 
         } catch (IOException e) {
@@ -160,8 +159,7 @@ public class MatrixCalculation {
         double sum = 0;
         double sign = 1;
         for (int s = 0; s <= k; s++) {
-            //sum += sign * C(k, s) * doubleC(k + s + betta, s) * pow(2 * s + 1, 1) * Math.exp(-(2 * s + 1) * C * gamma12 * tao / 2);
-            sum += sign * doubleC(k, s) * doubleC(k + s + betta, s) * pow(2 * s + 1, 1) * Math.exp(-(2 * s + 1) * C * gamma12 * tao / 2);
+            sum += sign * C(k, s) * doubleC(k + s + betta, s) * pow(2 * s + 1, 1) * Math.exp(-(2 * s + 1) * C * gamma12 * tao / 2);
 
             sign *= -1;
         }
@@ -172,8 +170,7 @@ public class MatrixCalculation {
         double res = 0;
         int sign = 1;
         for (int s = 0; s <= k; s++) {
-            //res += C(k, s) * doubleC(k + s + betta1, s) * sign * Math.exp(-(2 * s + 1) * 2 * gamma1 * tao / 2);
-            res += doubleC(k, s) * doubleC(k + s + betta1, s) * sign * Math.exp(-(2 * s + 1) * 2 * gamma1 * tao / 2);
+            res += C(k, s) * doubleC(k + s + betta1, s) * sign * Math.exp(-(2 * s + 1) * 2 * gamma1 * tao / 2);
 
             sign *= -1;
         }
@@ -185,8 +182,7 @@ public class MatrixCalculation {
         double res = 0;
         double sign = 1;
         for (int s = 0; s <= k; s++) {
-            //double binoms = C(k, s) * doubleC(k + s + betta13, s);
-            double binoms = doubleC(k, s) * doubleC(k + s + betta13, s);
+            double binoms = C(k, s) * doubleC(k + s + betta13, s);
             double exps = sign * Math.exp(-(2 * s + 1) * C * gamma13 * tao / 2);
             double rowSum = 0;
             for (int j = 0; j <= n; j++) {
@@ -221,7 +217,7 @@ public class MatrixCalculation {
     }
 
     private double c(double n, double k) {
-        return Gamma.gamma(n) / Gamma.gamma(k) / Gamma.gamma(n - k);
+        return Gamma.gamma(n + 1) / Gamma.gamma(k + 1) / Gamma.gamma(n - k + 1);
     }
 
     private double power(double x, int n) {
