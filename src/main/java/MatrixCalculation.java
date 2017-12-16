@@ -48,10 +48,11 @@ public class MatrixCalculation {
                 nextTao += deltaTao;
             }
 
-            //todo: remove
-            int N = 10;//(int) Math.floor(nextTao / deltaTao + 0.5);
+            /*//todo: remove
+            int N = 10;
             deltaTao = 0.05;
-            //todo: remove
+            //todo: remove*/
+            int N = (int) Math.floor(nextTao / deltaTao + 0.5);
 
             appendToInputFile(k, N, gamma, betta, deltaTao);
             /*
@@ -251,3 +252,4 @@ public class MatrixCalculation {
         return Math.pow(x, n);
     }
 }
+
