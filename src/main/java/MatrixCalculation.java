@@ -1,26 +1,22 @@
-import java.io.*;
-import java.util.Scanner;
-
 public class MatrixCalculation {
 
     private int formula;
     private int orderOfFunction;
     private double C;
     private double minError;
-    private String rootDir = System.getProperty("user.dir").concat("/");
-    private String inputFile;
-    private String outputFile;
+    private MRRunner runner;
 
     MatrixCalculation(int formula, int order, double c, double minError) {
         this.formula = formula;
         this.orderOfFunction = order;
         this.C = c;
         this.minError = minError;
+        this.runner = new MRRunner();
     }
 
     public double[][] calculateMatrix(double betta, double gamma) {
         double[][] matrix = new double[orderOfFunction][];
-        initFiles();
+        runner.initJacobiCalc(formula, orderOfFunction);
 
         for (int k = 1; k <= orderOfFunction; k++) {
             double deltaTao = Math.sqrt(8 * minError / Math.abs(derivativeMax(k, betta, gamma)));
@@ -54,7 +50,7 @@ public class MatrixCalculation {
             //todo: remove*/
             int N = (int) Math.floor(nextTao / deltaTao + 0.5);
 
-            appendToInputFile(k, N, gamma, betta, deltaTao);
+            runner.addInputParamsForKFuncOrder(formula, k, N, gamma, betta, deltaTao);
          /*   matrix[k - 1] = new double[N];
             for (int i = 0; i < N; i++) {
                 double tao = deltaTao * i;
@@ -62,97 +58,17 @@ public class MatrixCalculation {
             }*/
         }
 
-        matrix = runMapReduceJob();
+        matrix = runner.calcJacobiFunction();
 
         return matrix;
     }
 
-
-    private void initFiles() {
-        if (inputFile == null) {
-            inputFile = (formula == 0 ? "input_derivate" : formula == 1 ? "input_p" : "input_integral");
-            File inputF = new File(rootDir + inputFile);
-            try {
-                inputF.createNewFile();
-
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-            }
-        }
-
-        outputFile = (formula == 0 ? "out_derivate" : formula == 1 ? "out_p" : "out_integral");
+    public double[][] transposeMatrix(double[][] matrix) {
+        return runner.transposeMatrix(matrix);
     }
 
-    private void appendToInputFile(int k, int n, double gamma, double betta, double deltaTao) {
-        try {
-            PrintWriter printWriter = new PrintWriter(new BufferedWriter(
-                    new FileWriter(rootDir + inputFile, true)));
-            printWriter.println(String.format("%d %d %d %.15f %.15f %.15f", formula, k, n, gamma, betta, deltaTao));
-            printWriter.close();
-
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    private double[][] runMapReduceJob() {
-        try {
-            ProcessBuilder pb = new ProcessBuilder(
-                    "hadoop", "jar" , "src/main/resources/jacobi.jar", inputFile, outputFile)
-                    .redirectErrorStream(true)
-                    // Inherit System.out as redirect output stream
-                    .redirectOutput(ProcessBuilder.Redirect.INHERIT);
-            long time = System.currentTimeMillis();
-
-            Process p = pb.start();
-            p.waitFor();
-
-            time = System.currentTimeMillis() - time;
-            System.out.println("Time: " + time);
-
-            double[][] result = buildMatrix();
-
-            File inFile = new File(rootDir + inputFile);
-            File outFile = new File(rootDir + outputFile);
-            inFile.delete();
-            outFile.delete();
-
-            return result;
-
-        } catch (IOException | InterruptedException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return null;
-    }
-
-    private double[][] buildMatrix() {
-        double[][] matrix = new double[orderOfFunction][];
-        File file = new File(rootDir + outputFile);
-        try {
-            Scanner sc = new Scanner(new FileInputStream(file));
-            while (sc.hasNext()) {
-                String[] line = sc.nextLine().split("\\t");
-                String[] key = line[0].split(" ");
-                int k = Integer.valueOf(key[0]);
-                int i = Integer.valueOf(key[1]);
-
-                String[] value = line[1].split(" ");
-                double function = Double.valueOf(value[0]);
-
-                if (matrix[k - 1] == null) {
-                    int n = Integer.valueOf(value[1]);
-                    matrix[k - 1] = new double[n];
-                }
-
-                matrix[k - 1][i] = function;
-            }
-
-        } catch (FileNotFoundException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return matrix;
+    public double[][] multiplyMatrixByTransposed(double[][] matrix) {
+        return runner.multiplyMatrixByTransposed(matrix);
     }
 
     private double derivate(int k, double betta, double tao, double gamma12) {
@@ -248,4 +164,3 @@ public class MatrixCalculation {
         return Math.pow(x, n);
     }
 }
-
