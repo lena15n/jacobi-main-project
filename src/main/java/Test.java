@@ -14,14 +14,15 @@ public class Test {
         int order = 10;//4;//10;
         double minAllowedError = 0.001;
 
-//        double[][] matrixDerivate = new MatrixCalculation(0, order, C, minAllowedError).calculateMatrix(betta, gamma);
+//        double[][] matrixDerivate = new MatrixCalculationImpl(0, order, C, minAllowedError).calculateMatrix(betta, gamma);
 
-        double[][] dummyMatrix = new double[][] {{1, 2}, {3, 4}, {5, 6}};
-//        double[][] matrixTranspose = new MatrixCalculation(0, order, C, minAllowedError).transposeMatrix(dummyMatrix);
-        double[][] matrixMultiply = new MatrixCalculation(0, order, C, minAllowedError).multiplyMatrixByTransposed(dummyMatrix);
+//        double[][] dummyMatrix = new double[][] {{1, 2}, {3, 4}, {5, 6}};
+//        double[][] matrixTranspose = new MatrixCalculationImpl(0, order, C, minAllowedError).transposeMatrix(dummyMatrix);
+//        double[][] matrixMultiply = new MatrixCalculationImpl(0, order, C, minAllowedError).multiplyMatrixByTransposed(dummyMatrix);
 
-//        double[][] matrix = new MatrixCalculation(1, order, C, minAllowedError).calculateMatrix(betta, gamma);
-//        double[][] matrixIntegral = new MatrixCalculation(2, order, C, minAllowedError).calculateMatrix(betta, gamma);
+
+        double[][] matrix = new MatrixCalculationImpl(1, order, C).calculateMatrix(betta, gamma);
+//        double[][] matrixIntegral = new MatrixCalculationImpl(2, order, C, minAllowedError).calculateMatrix(betta, gamma);
 //        print("derivate", matrixDerivate);
 //        print("p", matrix);
 //        print("integral", matrixIntegral);
@@ -39,3 +40,4 @@ public class Test {
         System.err.println("===");
     }
 }
+

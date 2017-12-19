@@ -10,6 +10,7 @@ public class MRRunner {
     private int orderOfFunction;
 
     public void initJacobiCalc(int formula, int orderOfFunction) {
+        initFiles();
         this.formula = formula;
         this.orderOfFunction = orderOfFunction;
     }
@@ -65,15 +66,15 @@ public class MRRunner {
     }
 
     class MultiplyMatrixBuilder extends DefaultMatrixBuilder {
-        MultiplyMatrixBuilder(int rows, int columns) {
-            super(rows, columns);
+        MultiplyMatrixBuilder(int resultRows, int resultColumns) {
+            super(resultRows, resultColumns);
         }
 
         @Override
-        public double[][] buildMatrix() {
-            double[][] matrix = new double[outRows][];
+        public double[][] readResultMatrix() {
+            double[][] matrix = new double[resultRows][];
             for (int i = 0; i < matrix.length; i++) {
-                matrix[i] = new double[outColumns];
+                matrix[i] = new double[resultColumns];
             }
 
             File file = new File(rootDir + outputFile);
@@ -97,17 +98,17 @@ public class MRRunner {
     }
 
     class DefaultMatrixBuilder implements MatrixBuilder {
-        protected int outRows;
-        protected int outColumns;
+        protected int resultRows;
+        protected int resultColumns;
 
-        DefaultMatrixBuilder(int outRows, int outColumns) {
-            this.outRows = outRows;
-            this.outColumns = outColumns;
+        DefaultMatrixBuilder(int resultRows, int resultColumns) {
+            this.resultRows = resultRows;
+            this.resultColumns = resultColumns;
         }
 
         @Override
-        public double[][] buildMatrix() {
-            double[][] matrix = new double[outRows][];
+        public double[][] readResultMatrix() {
+            double[][] matrix = new double[resultRows][];
             File file = new File(rootDir + outputFile);
             try {
                 Scanner sc = new Scanner(new FileInputStream(file));
@@ -117,7 +118,7 @@ public class MRRunner {
 
                     StringTokenizer value = new StringTokenizer(line[1]);
 
-                    matrix[i] = new double[outColumns];
+                    matrix[i] = new double[resultColumns];
                     for (int j = 0; j < matrix[0].length; j++) {
                         matrix[i][j] = Double.valueOf(value.nextToken());
                     }
@@ -151,14 +152,14 @@ public class MRRunner {
     }
 
     class JacobiMatrixBuilder implements MatrixBuilder {
-        private int rows;
+        private int resultRows;
 
-        JacobiMatrixBuilder(int rows) {
-            this.rows = rows;
+        JacobiMatrixBuilder(int resultRows) {
+            this.resultRows = resultRows;
         }
 
-        public double[][] buildMatrix() {
-            double[][] matrix = new double[rows][];
+        public double[][] readResultMatrix() {
+            double[][] matrix = new double[resultRows][];
             File file = new File(rootDir + outputFile);
             try {
                 Scanner sc = new Scanner(new FileInputStream(file));
@@ -188,7 +189,7 @@ public class MRRunner {
     }
 
     private interface MatrixBuilder {
-        double[][] buildMatrix();
+        double[][] readResultMatrix();
     }
 
     private double[][] runMRJob(String pathToJobJar, String[] args, MatrixBuilder builder) {
@@ -220,12 +221,15 @@ public class MRRunner {
             time = System.currentTimeMillis() - time;
             System.out.println("Time: " + time);
 
-            double[][] result = builder.buildMatrix();
+            double[][] result = builder.readResultMatrix();
 
             File inFile = new File(rootDir + inputFile);
             File outFile = new File(rootDir + outputFile);
             inFile.delete();
             outFile.delete();
+
+            inputFile = null;
+            outputFile = null;
 
             return result;
 
